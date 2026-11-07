@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HABERVERSE</title>
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400..800;1,14..32,400..700&display=swap">
+<link rel="stylesheet" href="assets/css/haberverse.css">
+</head>
+<body>
+
+<div class="app" id="app" hidden>
+  <aside class="side">
+    <div class="wordmark">HABERVERSE</div>
+    <button class="new-btn" id="newBtn" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New</button>
+    <button class="nav on" type="button" data-nav="home" data-drop=""><svg viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2 2h7.4A2.5 2.5 0 0 1 21 9.5v8a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></svg><span>My HABERVERSE</span></button>
+    <button class="nav" type="button" data-nav="recent"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Recent</span></button>
+    <div class="grow"></div>
+    <button class="storage" id="storageBtn" type="button" title="Where your files are kept">
+      <span class="s-ico" id="storageIco"></span>
+      <span><b id="storageName"></b><small id="storageDetail"></small></span>
+    </button>
+  </aside>
+
+  <main class="main">
+    <header class="bar">
+      <label class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="search" type="search" placeholder="Search in HABERVERSE" autocomplete="off" aria-label="Search">
+      </label>
+      <span class="spacer"></span>
+      <button class="icon-btn" id="refreshBtn" type="button" title="Refresh" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg></button>
+      <button class="icon-btn" id="viewBtn" type="button" title="List view" aria-label="Switch view"></button>
+    </header>
+    <nav class="crumbs" id="crumbs" aria-label="Folder path"></nav>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+
+<div class="menu pop" id="newMenu" role="menu">
+  <button type="button" data-new="doc"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>New document</button>
+  <button type="button" data-new="folder"><svg viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2 2h7.4A2.5 2.5 0 0 1 21 9.5v8a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><path d="M12 10.5v6M9 13.5h6"/></svg>New folder</button>
+  <div class="sep"></div>
+  <button type="button" data-new="files"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>Upload files</button>
+  <button type="button" data-new="dir"><svg viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2 2h7.4A2.5 2.5 0 0 1 21 9.5v8a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><path d="M12 17v-6m0 0l-2.5 2.5M12 11l2.5 2.5"/></svg>Upload folder</button>
+</div>
+<div class="menu pop" id="ctxMenu" role="menu"></div>
+<div class="menu pop" id="storageMenu" role="menu">
+  <button type="button" data-st="github"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg>Open the folder on GitHub</button>
+  <button type="button" data-st="forget" class="danger"><svg viewBox="0 0 24 24"><path d="M15 9l-6 6M9 9l6 6"/><circle cx="12" cy="12" r="9"/></svg>Disconnect this device</button>
+</div>
+
+<div class="dialog-wrap" id="dialog">
+  <form class="dialog" id="dialogForm" novalidate>
+    <h2 id="dlgTitle"></h2>
+    <p id="dlgMsg"></p>
+    <input id="dlgInput" autocomplete="off" spellcheck="false" aria-labelledby="dlgTitle">
+    <div class="actions">
+      <button class="btn" type="button" id="dlgCancel">Cancel</button>
+      <button class="btn primary" type="submit" id="dlgOk">OK</button>
+    </div>
+  </form>
+</div>
+
+<div class="doc-sheet" id="docSheet"><div class="sheet-spin"></div><iframe id="docFrame" title="Document"></iframe></div>
+
+<div class="preview" id="preview" role="dialog" aria-modal="true" aria-labelledby="pvName">
+  <div class="pv-bar">
+    <button class="icon-btn" id="pvClose" type="button" title="Close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="pv-name" id="pvName"></span>
+    <button class="btn primary" id="pvAsDoc" type="button">Open as document</button>
+    <button class="btn" id="pvDownload" type="button">Download</button>
+  </div>
+  <div class="pv-body" id="pvBody"></div>
+</div>
+
+<div class="uploads" id="uploads" aria-live="polite">
+  <div class="up-head"><span id="upTitle"></span><button class="icon-btn" id="upClose" type="button" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="up-list" id="upList"></div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<div class="drop-zone" id="dropZone" aria-hidden="true">
+  <div class="tint"></div>
+  <svg class="frame"><rect x="10" y="10" rx="20" ry="20"/></svg>
+  <div class="hint"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span id="dropText">Drop to upload</span></div>
+</div>
+
+<div class="dialog-wrap unlock" id="unlock">
+  <form class="dialog" id="ukForm" novalidate>
+    <span class="uk-ico"><svg viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.4-9A6 6 0 0 1 18 8.5a4 4 0 0 1-1 9.5z"/></svg></span>
+    <h2 id="ukTitle"></h2>
+    <p id="ukText"></p>
+    <div id="ukRepoRow">
+      <label for="ukRepo">Repository</label>
+      <input id="ukRepo" placeholder="your-name/your-repo" autocomplete="off" spellcheck="false">
+    </div>
+    <label for="ukToken">Access token</label>
+    <input id="ukToken" type="password" autocomplete="off" spellcheck="false">
+    <p class="help"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Create a token on GitHub</a>. Under <b>Repository access</b> pick only this repository, and under <b>Permissions</b> set <b>Contents</b> to <b>Read and write</b>. It stays in this browser.</p>
+    <p class="uk-msg" id="ukMsg" role="alert"></p>
+    <div class="actions">
+      <button class="btn" type="button" id="ukCancel">Not now</button>
+      <button class="btn primary" type="submit" id="ukGo">Connect</button>
+    </div>
+  </form>
+</div>
+
+<input type="file" id="pickFiles" multiple hidden>
+<input type="file" id="pickDir" multiple webkitdirectory hidden>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/haberverse.js"></script>
+</body>
+</html>

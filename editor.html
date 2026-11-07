@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Untitled</title>
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400..700;1,14..32,400..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&display=swap">
+<link rel="stylesheet" href="assets/css/editor.css">
+</head>
+<body>
+
+<header class="top" id="top">
+  <button class="dots back-btn" id="backBtn" type="button" title="Back to HABERVERSE" aria-label="Back to HABERVERSE" hidden>
+    <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+  </button>
+  <div class="menu-wrap">
+    <button class="dots" id="menuBtn" type="button" title="Menu" aria-label="Menu" aria-haspopup="true" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg>
+    </button>
+    <div class="menu pop" id="menu" role="menu">
+      <button class="menu-item" type="button" role="menuitem" data-act="print">Print</button>
+      <button class="menu-item" type="button" role="menuitem" data-act="export" aria-expanded="false">Export
+        <span class="chev"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></span></button>
+      <div class="sub" id="exportSub">
+        <div class="sub-inner">
+          <button class="menu-item" type="button" role="menuitem" data-act="pdf" tabindex="-1">PDF</button>
+          <button class="menu-item" type="button" role="menuitem" data-act="word" tabindex="-1">Word (.doc)</button>
+          <button class="menu-item" type="button" role="menuitem" data-act="text" tabindex="-1">Text (.txt)</button>
+        </div>
+      </div>
+      <div class="menu-sep"></div>
+      <button class="menu-item" type="button" role="menuitem" data-act="image">Insert image</button>
+      <button class="menu-item" type="button" role="menuitem" data-act="import">Import <span class="meta">Word, PDF, slides…</span></button>
+      <div class="menu-sep"></div>
+      <div class="menu-row">
+        <span>Font</span>
+        <div class="seg" id="fontSeg">
+          <span class="thumb"></span>
+          <button type="button" data-font="sans">Sans</button>
+          <button type="button" data-font="serif">Serif</button>
+          <button type="button" data-font="mono">Mono</button>
+        </div>
+      </div>
+      <div class="menu-row">
+        <span>Size</span>
+        <div class="size-ctl">
+          <output id="sizeVal">18</output>
+          <div class="stepper">
+            <button type="button" data-step="-1" aria-label="Smaller text">−</button>
+            <i></i>
+            <button type="button" data-step="1" aria-label="Bigger text">+</button>
+          </div>
+        </div>
+      </div>
+      <p class="menu-hint">Select text to format it. Click a picture to resize, crop or move it. Drop files anywhere to add them.</p>
+    </div>
+  </div>
+  <input id="name" value="Untitled document" placeholder="Untitled document" spellcheck="false" autocomplete="off" aria-label="File name">
+  <span class="saved" id="saved"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="savedText">Saved</span></span>
+</header>
+
+<main class="sheet" id="sheet">
+  <div class="editor" id="editor" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="Page"></div>
+</main>
+
+<div class="slash-menu pop" id="slashMenu" role="listbox" aria-label="Insert">
+  <div class="slash-scroll" id="slashScroll">
+    <div class="slash-hl" id="slashHl"></div>
+    <div class="slash-list" id="slashList"></div>
+  </div>
+</div>
+
+<div class="bubble pop" id="bubble" role="toolbar" aria-label="Format selected text">
+  <button type="button" data-fmt="bold" title="Bold (Ctrl+B)" aria-label="Bold"><b>B</b></button>
+  <button type="button" data-fmt="italic" title="Italic (Ctrl+I)" aria-label="Italic"><i class="serif-i">I</i></button>
+  <button type="button" data-fmt="underline" title="Underline (Ctrl+U)" aria-label="Underline"><u>U</u></button>
+  <button type="button" data-fmt="strikeThrough" title="Strikethrough" aria-label="Strikethrough"><s>S</s></button>
+  <span class="bsep"></span>
+  <button type="button" class="ff" data-ff="sans" title="Sans" aria-label="Sans font">Aa</button>
+  <button type="button" class="ff" data-ff="serif" title="Serif" aria-label="Serif font">Aa</button>
+  <button type="button" class="ff" data-ff="mono" title="Mono" aria-label="Mono font">Aa</button>
+  <span class="bsep"></span>
+  <button type="button" data-fs="-1" title="Smaller" aria-label="Smaller"><span class="a-small">A</span></button>
+  <button type="button" data-fs="1" title="Bigger" aria-label="Bigger"><span class="a-big">A</span></button>
+  <span class="arrow"></span>
+</div>
+
+<div class="img-frame" id="imgFrame" aria-hidden="true">
+  <span class="h" data-h="nw"></span><span class="h" data-h="n"></span><span class="h" data-h="ne"></span><span class="h" data-h="e"></span>
+  <span class="h" data-h="se"></span><span class="h" data-h="s"></span><span class="h" data-h="sw"></span><span class="h" data-h="w"></span>
+  <div class="crop-layer" id="cropLayer">
+    <div class="crop-dim"></div><div class="crop-dim"></div><div class="crop-dim"></div><div class="crop-dim"></div>
+    <div class="crop-box" id="cropBox">
+      <span class="ch" data-c="nw"></span><span class="ch" data-c="n"></span><span class="ch" data-c="ne"></span><span class="ch" data-c="e"></span>
+      <span class="ch" data-c="se"></span><span class="ch" data-c="s"></span><span class="ch" data-c="sw"></span><span class="ch" data-c="w"></span>
+    </div>
+  </div>
+  <span class="img-size" id="imgSize"></span>
+</div>
+
+<div class="img-bar pop" id="imgBar" role="toolbar" aria-label="Image">
+  <div class="tools">
+    <button type="button" data-align="left" title="Align left" aria-label="Align left"><svg viewBox="0 0 24 24"><path d="M3 4h18M3 20h18"/><rect x="3" y="8" width="9" height="8" rx="1.5"/></svg></button>
+    <button type="button" data-align="center" title="Center" aria-label="Center"><svg viewBox="0 0 24 24"><path d="M3 4h18M3 20h18"/><rect x="7.5" y="8" width="9" height="8" rx="1.5"/></svg></button>
+    <button type="button" data-align="right" title="Align right" aria-label="Align right"><svg viewBox="0 0 24 24"><path d="M3 4h18M3 20h18"/><rect x="12" y="8" width="9" height="8" rx="1.5"/></svg></button>
+    <button type="button" data-align="wrap-left" title="Wrap text, picture on the left" aria-label="Wrap text, picture on the left"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="8" rx="1.5"/><path d="M14 5h7M14 8.5h7M14 12h7M3 16h18M3 20h12"/></svg></button>
+    <button type="button" data-align="wrap-right" title="Wrap text, picture on the right" aria-label="Wrap text, picture on the right"><svg viewBox="0 0 24 24"><rect x="13" y="4" width="8" height="8" rx="1.5"/><path d="M3 5h7M3 8.5h7M3 12h7M3 16h18M3 20h12"/></svg></button>
+    <span class="bsep"></span>
+    <button type="button" data-shape="square" title="Square corners" aria-label="Square corners"><svg viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="15" height="15" rx=".5"/></svg></button>
+    <button type="button" data-shape="rounded" title="Rounded corners" aria-label="Rounded corners"><svg viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="15" height="15" rx="5"/></svg></button>
+    <button type="button" data-shape="circle" title="Circle" aria-label="Circle"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></button>
+    <span class="bsep"></span>
+    <button type="button" data-img="rotate" title="Rotate" aria-label="Rotate"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg></button>
+    <button type="button" data-img="crop" title="Crop" aria-label="Crop"><svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/></svg></button>
+    <button type="button" data-img="reset" title="Original size" aria-label="Original size"><svg viewBox="0 0 24 24"><path d="M9 4H4v5M15 20h5v-5M4 4l6.5 6.5M20 20l-6.5-6.5"/></svg></button>
+    <span class="bsep"></span>
+    <button type="button" class="danger" data-img="delete" title="Delete image" aria-label="Delete image"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>
+  </div>
+  <div class="crop-actions">
+    <button type="button" data-crop="cancel">Cancel</button>
+    <button type="button" class="done" data-crop="done">Done</button>
+  </div>
+</div>
+
+<div class="drop-layer" id="dropLayer" aria-hidden="true">
+  <div class="tint"></div>
+  <svg class="drop-frame"><rect x="10" y="10" rx="18" ry="18"/></svg>
+  <div class="drop-hint"><svg viewBox="0 0 24 24"><path d="M12 3v11m0 0l-4-4m4 4l4-4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span id="dropHintText">Drop to add it to your page</span></div>
+  <div class="drop-line" id="dropLine"></div>
+  <div class="drop-card" id="dropCard">
+    <div class="card-inner" id="cardInner">
+      <span class="card-back b1"></span>
+      <span class="card-back b2"></span>
+      <div class="card-face">
+        <div class="doc-ico"><i></i><i></i><i></i></div>
+        <div class="img-ico"><svg viewBox="0 0 58 34"><circle cx="42" cy="9" r="5" fill="#fff" opacity=".9"/><path d="M0 34 L18 12 L30 26 L38 18 L58 34 Z" fill="#fff" opacity=".92"/></svg></div>
+        <span class="card-label" id="dropLabel">File</span>
+      </div>
+      <span class="card-count" id="dropCount">2</span>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" multiple hidden
+  accept=".docx,.doc,.pdf,.pptx,.odt,.rtf,.xlsx,.xls,.ods,.csv,.tsv,.txt,.md,.markdown,.html,.htm,.json,.xml,.js,.ts,.py,.java,.c,.cpp,.cs,.css,.sql,.yml,.yaml,.tex,.log,image/*,text/*">
+<input type="file" id="imageInput" multiple hidden accept="image/*">
+
+<script src="assets/js/editor.js"></script>
+</body>
+</html>
