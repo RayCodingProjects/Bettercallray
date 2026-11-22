@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TrueFrame evaluation harness</title>
+<script src="../assets/js/coi.js"></script>
+<style>body{font:14px/1.5 system-ui,sans-serif;margin:24px;background:#fff;color:#111}pre{white-space:pre-wrap}</style>
+</head>
+<body>
+<h1>TrueFrame evaluation harness</h1>
+<p id="status">Starting…</p>
+<pre id="log"></pre>
+<script src="../assets/js/engine/core.js"></script>
+<script src="../assets/js/engine/fft.js"></script>
+<script src="../assets/js/engine/calibration.js"></script>
+<script src="../assets/js/engine/metadata.js"></script>
+<script src="../assets/js/engine/forensics.js"></script>
+<script src="../assets/js/engine/imageops.js"></script>
+<script src="../assets/js/engine/neural.js"></script>
+<script src="../assets/js/engine/evidence.js"></script>
+<script src="../assets/js/engine/fusion.js"></script>
+<script src="../assets/js/engine/detector.js"></script>
+<script>
+/*
+ * Query parameters:
+ *   manifest  URL of a JSON array [{file, label: "ai"|"real", ...}]
+ *   base      URL prefix for the files
+ *   tier      neural tier: off | light | standard   (default off)
+ *   dtype     optional weight precision override for the models: q4 (default) | q8 | fp16
+ *   out       results name (POSTed to /__results?name=<out>)
+ *   limit     max number of files
+ */
+(async function () {
+  const q = new URLSearchParams(location.search);
+  const status = document.getElementById('status');
+  const log = document.getElementById('log');
+  const tier = q.get('tier') || 'off';
+  if (q.get('dtype')) window.__tfDtype = q.get('dtype');
+  const out = [];
+  try {
+    const manifest = await (await fetch(q.get('manifest'))).json();
+    const items = manifest.slice(0, +q.get('limit') || 1e9);
+    for (const item of items) {
+      const t0 = performance.now();
+      try {
+        const blob = await (await fetch(q.get('base') + item.file)).blob();
+        const file = new File([blob], item.file.split('/').pop(), { type: blob.type });
+        const r = await TrueFrame.detector.analyze(file, { tier });
+        out.push({
+          file: item.file, label: item.label, variant: item.variant || 'original',
+          p: r.fusion.p, logit: r.fusion.logit, verdict: r.fusion.verdict.key, confidence: r.fusion.confidence,
+          categories: r.fusion.categories.map((c) => [c.key, +c.score.toFixed(3)]),
+          signals: r.signals.map((s) => ({ id: s.id, llr: +s.llr.toFixed(3), title: s.title })),
+          forensics: r.forensics, neural: r.neural && r.neural.models.map((m) => ({ key: m.key, p: m.p, per: m.perInput, err: m.error })),
+          meta: {
+            format: r.meta.format, w: r.file.width, h: r.file.height, exif: !!r.meta.exif,
+            jpegQ: r.meta.jpeg && r.meta.jpeg.quality, gen: r.meta.generator && r.meta.generator.tool,
+            c2pa: r.meta.c2pa && { generators: r.meta.c2pa.generators, agents: r.meta.c2pa.softwareAgents, types: r.meta.c2pa.sourceTypes, signers: r.meta.c2pa.signerOrgs, err: r.meta.c2pa.parseError },
+            aiHits: r.meta.aiHits.map((h) => h.name + ' @ ' + h.where), sourceTypes: r.meta.sourceTypes.map((s) => s.code),
+            camera: r.meta.camera,
+          },
+          warnings: r.warnings, ms: Math.round(performance.now() - t0),
+        });
+        log.textContent += `${item.label}\t${(r.fusion.p * 100).toFixed(0)}%\t${r.fusion.verdict.key}\t${item.file}\n`;
+      } catch (e) {
+        out.push({ file: item.file, label: item.label, error: String((e && e.stack) || e) });
+        log.textContent += `ERROR ${item.file}: ${e}\n`;
+      }
+      status.textContent = `${out.length}/${items.length}`;
+      // checkpoint, so a long run that is interrupted still leaves its results behind
+      if (out.length % 25 === 0) fetch('/__results?name=' + encodeURIComponent((q.get('out') || 'results') + '.partial'), { method: 'POST', body: JSON.stringify(out) }).catch(() => {});
+    }
+  } catch (e) {
+    out.push({ fatal: String((e && e.stack) || e) });
+  }
+  await fetch('/__results?name=' + encodeURIComponent(q.get('out') || 'results'), { method: 'POST', body: JSON.stringify(out) });
+  status.textContent = 'DONE';
+  document.title = 'DONE';
+})();
+</script>
+</body>
+</html>
